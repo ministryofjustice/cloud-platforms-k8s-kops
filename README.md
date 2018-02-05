@@ -1,5 +1,5 @@
 # cloud-platforms-k8s-kops
-Resources for Kubernetes clusters with Kops
+Resources for Kubernetes clusters with Kops, and example cluster service resources (not Kops-specifc).
 
 ## Prerequisites
 - Install [Kops](https://github.com/kubernetes/kops)
@@ -77,3 +77,25 @@ It takes a few minutes for the cluster to deploy and come up - you can check pro
 `$ kops validate cluster`
 
 Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` you can proceed to use `kubectl` to interact with the cluster.
+
+## Cluster components
+
+Example cluster components/services in `cluster-components/` - intended as a starting point for experimentation and discussion, but also providing some useful functionality.
+
+Cluster components are installed using `Helm`/`Tiller`, so that must be installed first.
+
+### Helm
+
+[Helm](https://helm.sh) - the package manager for Kubernetes. Includes two components - `Helm`, the command line client, and `Tiller`, the server-side component.
+
+- Install command line client: `$ brew install kubernetes-helm`
+- Create a ServiceAccount and RoleBinding for Tiller: `$ kubectl apply -f cluster-components/helm/rbac-config.yml`
+- Install Tiller, with ServiceAccount config: `$ helm init --service-account tiller`
+
+This installs Tiller as a cluster-wide service, with `cluster-admin` permissions. These permissions are too broad for a production multi-tenant environment, and are used here for test purposes only - in real-world usage Tiller should be deployed into each tenant namespace, with permissions scoped to that namespaces only.
+
+#### Using Helm
+- `$ helm repo update` - update package list, a la `apt-get update`
+- `$ helm search` - see what's available in the public repo
+- `$ helm install wordpress` - install Wordpress
+
