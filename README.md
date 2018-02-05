@@ -99,3 +99,10 @@ This installs Tiller as a cluster-wide service, with `cluster-admin` permissions
 - `$ helm search` - see what's available in the public repo
 - `$ helm install wordpress` - install Wordpress
 
+### nginx-ingress
+
+An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers) based on nginx. Ingress controllers serve as HTTP routers/proxies that watch the Kubernetes API for `Ingress` rules, and create routes/proxy configs to route traffic from the internet to services and pods.
+
+`$ helm install nginx-ingress -f cluster-components/nginx-ingress/values.yml`
+
+This will deploy the nginx-controller using the arguments specified in `values.yml`. By default, nginx-controller specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.

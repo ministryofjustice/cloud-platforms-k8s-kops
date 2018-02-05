@@ -1,0 +1,6 @@
+controller:
+  replicaCount: 3
+
+rbac:
+  create: true
+  serviceAccountName: default
