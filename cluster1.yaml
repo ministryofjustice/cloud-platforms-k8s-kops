@@ -33,6 +33,11 @@ spec:
   iam:
     allowContainerRegistry: true
     legacy: false
+  kubeAPIServer:
+    oidcClientID: nEmRfCMu80zLneVipmzevohG0ECL1Sig
+    oidcIssuerURL: https://moj-cloud-platforms-dev.eu.auth0.com/
+    oidcUsernameClaim: nickname
+    oidcGroupsClaim: https://api.cluster-1.kops.integration.dsd.io/groups
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.8.6
