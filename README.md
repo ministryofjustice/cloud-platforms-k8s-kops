@@ -6,7 +6,7 @@ Resources for Kubernetes clusters with Kops, and example cluster service resourc
 - Install [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/)
 - Install [git-crypt](https://www.agwa.name/projects/git-crypt/)
 
-**GPG Note:** As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to use the SSH keys, but is not required to obtain Kubernetes credentials for exist as long as you have valid AWS credentials, as they can be obtained from S3.
+**GPG Note:** As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to use the SSH keys. A GPG is not required to obtain Kubernetes credentials and interact with clusters however - as long as you have valid AWS credentials and access to the Kops S3 bucket you can download credentials for `kubeconfig` using `kops`.
 
 ### MacOS
 ```
@@ -105,4 +105,4 @@ An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/
 
 `$ helm install nginx-ingress -f cluster-components/nginx-ingress/values.yml`
 
-This will deploy the nginx-controller using the arguments specified in `values.yml`. By default, nginx-controller specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
+This will deploy the nginx-ingress controller using the arguments specified in `values.yml`. By default, nginx-ingress specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
