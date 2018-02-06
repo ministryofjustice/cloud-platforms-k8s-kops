@@ -62,11 +62,11 @@ kops create cluster \
     > ${CLUSTER_NAME}.yaml
 ```
 
-### Create SSH public key in kops state store
-`$ kops create secret --name ${CLUSTER_NAME}.kops.integration.dsd.io sshpublickey admin -i ssh/${CLUSTER_NAME}_kops_id_rsa.pub`
-
 ### Create cluster specification in kops state store
 `$ kops create -f ${CLUSTER_NAME}.yaml`
+
+### Create SSH public key in kops state store
+`$ kops create secret --name ${CLUSTER_NAME}.kops.integration.dsd.io sshpublickey admin -i ssh/${CLUSTER_NAME}_kops_id_rsa.pub`
 
 ### Create cluster resources in AWS
 aka update cluster in AWS according to the yaml specification:
