@@ -114,3 +114,10 @@ This will deploy the nginx-ingress controller using the arguments specified in `
 `$ helm install external-dns -f cluster-components/external-dns/values.yml`
 
 The configuration in `values.yml` allows DNS to be created for `Service` objects only, as these examples are using a single `nginx-ingress` service and ELB; that nginx-ingress `Service` object has a `external-dns.alpha.kubernetes.io/hostname` annotation to create a wildcard DNS record for that ELB.
+
+### kube-lego
+[kube-lego](https://github.com/jetstack/kube-lego) is an in-cluster service that watches the Kubernetes API for `Ingress` rules with SSL/TLS definitions, obtains TLS certificates from Let's Encrypt, and configures the ingress-controller with the obtained cert. To install with Helm:
+
+`$ helm install kube-lego -f cluster-components/kube-lego/values.yml`
+
+For an Ingress rule to receive a TTLs certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
