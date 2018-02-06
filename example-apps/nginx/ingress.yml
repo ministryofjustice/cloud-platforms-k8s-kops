@@ -5,6 +5,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     kubernetes.io/tls-acme: "true"
+    ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: example-nginx.apps.cluster1.kops.integration.dsd.io
