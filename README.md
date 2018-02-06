@@ -106,3 +106,11 @@ An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/
 `$ helm install nginx-ingress -f cluster-components/nginx-ingress/values.yml`
 
 This will deploy the nginx-ingress controller using the arguments specified in `values.yml`. By default, nginx-ingress specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
+
+### external-dns
+
+[external-dns](https://github.com/kubernetes-incubator/external-dns) is a Kubernetes incubator project that automatically creates/updates/deletes DNS entries in Route53 based on declared hostnames in `Ingress` and `Service` objects. To install with Helm:
+
+`$ helm install external-dns -f cluster-components/external-dns/values.yml`
+
+The configuration in `values.yml` allows DNS to be created for `Service` objects only, as these examples are using a single `nginx-ingress` service and ELB; that nginx-ingress `Service` object has a `external-dns.alpha.kubernetes.io/hostname` annotation to create a wildcard DNS record for that ELB.
