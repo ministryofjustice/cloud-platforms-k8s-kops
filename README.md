@@ -23,7 +23,7 @@ brew install git-crypt
 2. Kops stores resource specifications and credentials in an S3 bucket, which must be specified before using `kops`:
  `$ export KOPS_STATE_STORE=s3://moj-cloud-platforms-kops-state-store`
 3. Download cluster credentials from S3 and configure `kubectl` for use:
- `kops export kubecfg cluster-1.kops.integration.dsd.io`
+ `kops export kubecfg cluster1.kops.integration.dsd.io`
 4. Verify that you can interact with the cluster:
  `$ kubectl cluster-info`
 5. Check what's running:

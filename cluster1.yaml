@@ -2,7 +2,7 @@ apiVersion: kops/v1alpha2
 kind: Cluster
 metadata:
   creationTimestamp: null
-  name: cluster-1.kops.integration.dsd.io
+  name: cluster1.kops.integration.dsd.io
 spec:
   api:
     loadBalancer:
@@ -16,7 +16,7 @@ spec:
             "route53:ChangeResourceRecordSets"
           ],
           "Resource": [
-            "arn:aws:route53:::hostedzone/Z3VNZSDDOHTRI0"
+            "arn:aws:route53:::hostedzone/ZC2DVIHXGLSKO"
           ]
         },
         {
@@ -34,8 +34,8 @@ spec:
     rbac: {}
   channel: stable
   cloudProvider: aws
-  configBase: s3://moj-cloud-platforms-kops-state-store/cluster-1.kops.integration.dsd.io
-  dnsZone: kops.integration.dsd.io
+  configBase: s3://moj-cloud-platforms-kops-state-store/cluster1.kops.integration.dsd.io
+  dnsZone: cluster1.kops.integration.dsd.io
   etcdClusters:
   - etcdMembers:
     - instanceGroup: master-eu-west-1a
@@ -60,11 +60,11 @@ spec:
     oidcClientID: nEmRfCMu80zLneVipmzevohG0ECL1Sig
     oidcIssuerURL: https://moj-cloud-platforms-dev.eu.auth0.com/
     oidcUsernameClaim: nickname
-    oidcGroupsClaim: https://api.cluster-1.kops.integration.dsd.io/groups
+    oidcGroupsClaim: https://api.cluster1.kops.integration.dsd.io/groups
   kubernetesApiAccess:
   - 0.0.0.0/0
   kubernetesVersion: 1.8.6
-  masterPublicName: api.cluster-1.kops.integration.dsd.io
+  masterPublicName: api.cluster1.kops.integration.dsd.io
   networkCIDR: 172.20.0.0/16
   networking:
     calico: {}
@@ -98,7 +98,7 @@ spec:
     zone: eu-west-1c
   topology:
     bastion:
-      bastionPublicName: bastion.cluster-1.kops.integration.dsd.io
+      bastionPublicName: bastion.cluster1.kops.integration.dsd.io
     dns:
       type: Public
     masters: private
@@ -111,7 +111,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: cluster-1.kops.integration.dsd.io
+    kops.k8s.io/cluster: cluster1.kops.integration.dsd.io
   name: master-eu-west-1a
 spec:
   image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-01-14
@@ -131,7 +131,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: cluster-1.kops.integration.dsd.io
+    kops.k8s.io/cluster: cluster1.kops.integration.dsd.io
   name: master-eu-west-1b
 spec:
   image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-01-14
@@ -151,7 +151,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: cluster-1.kops.integration.dsd.io
+    kops.k8s.io/cluster: cluster1.kops.integration.dsd.io
   name: master-eu-west-1c
 spec:
   image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-01-14
@@ -171,7 +171,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: cluster-1.kops.integration.dsd.io
+    kops.k8s.io/cluster: cluster1.kops.integration.dsd.io
   name: nodes
 spec:
   image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-01-14
@@ -193,7 +193,7 @@ kind: InstanceGroup
 metadata:
   creationTimestamp: null
   labels:
-    kops.k8s.io/cluster: cluster-1.kops.integration.dsd.io
+    kops.k8s.io/cluster: cluster1.kops.integration.dsd.io
   name: bastions
 spec:
   image: kope.io/k8s-1.8-debian-jessie-amd64-hvm-ebs-2018-01-14
