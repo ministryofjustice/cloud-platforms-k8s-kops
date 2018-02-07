@@ -62,13 +62,13 @@ kops create cluster \
     > ${CLUSTER_NAME}.yaml
 ```
 
-### Create cluster specification in kops state store
+#### Create cluster specification in kops state store
 `$ kops create -f ${CLUSTER_NAME}.yaml`
 
-### Create SSH public key in kops state store
+#### Create SSH public key in kops state store
 `$ kops create secret --name ${CLUSTER_NAME}.kops.integration.dsd.io sshpublickey admin -i ssh/${CLUSTER_NAME}_kops_id_rsa.pub`
 
-### Create cluster resources in AWS
+#### Create cluster resources in AWS
 aka update cluster in AWS according to the yaml specification:
 `$ kops update cluster ${CLUSTER_NAME}.kops.integration.dsd.io --yes`
 
@@ -78,11 +78,45 @@ It takes a few minutes for the cluster to deploy and come up - you can check pro
 
 Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` you can proceed to use `kubectl` to interact with the cluster.
 
+## Authentication
+
+### Identity provider and Kubernetes cluster config
+For our use case, we want authentication and identity to be handled by Github, and to derive all cluster access control from Github teams - projects will be deployed into namespaces (e.g. `pvb-production`, `cla-staging`), and access to resources in those namespaces should be available to the appropriate teams only (e.g. `PVB` and `CLA` teams).
+
+Kubernetes supports authentication from external identity providers, including group definition, via [OIDC](https://kubernetes.io/docs/admin/authentication/#openid-connect-tokens). Github however only support OAuth2 as an authentication method, so an identity broker is required to translate from OAuth2 to OIDC.
+
+As work on MOJ's identity service is ongoing, a development [Auth0](https://www.auth0.com) account has been created to act as a standin in the meantime. That Auth0 account has been configured with a rule to add github team membership to the OIDC `id_token`, which Kubernetes can than map to a [Role or ClusterRole](https://kubernetes.io/docs/admin/authorization/rbac/#role-and-clusterrole) resource - this rule can be viewed in `authentication/auth0-rules/whitelist-github-org-and-add-teams-to-group-claim.js`.
+
+For Kubernetes to consume the user and group information in the Auth0 `id_token`, configuration options for Auth0 and user/group mapping must be passed to the Kubernetes master servers. This config can be provided in the Kops cluster specification, e.g:
+
+```
+  kubeAPIServer:
+    oidcClientID: nEmRfCMu80zLneVipmzevohG0ECL1Sig
+    oidcIssuerURL: https://moj-cloud-platforms-dev.eu.auth0.com/
+    oidcUsernameClaim: nickname
+    oidcGroupsClaim: https://api.cluster1.kops.integration.dsd.io/groups
+```
+
+This is included in the full `cluster1.yaml` specification.
+
+### End user authentication and credential setup
+End users require credentials on their local machines in order to be able to use `kubectl`, `helm` etc. Those credentials contain information obtained from the identity provider - in our case Auth0 - which requires a browser-based authentication flow.
+
+To handle user authentication and generation of cluster credentials, a webapp called [Kuberos](#kuberos) has been deployed at [https://kuberos.apps.cluster1.kops.integration.dsd.io](https://kuberos.apps.cluster1.kops.integration.dsd.io).
+
+**Important note** - the instructions provided by Kuberos will either overwrite your local `kubectl` config entirely, or any existing config for this specific cluster, so if you have already obtained static cluster credentials with `kops export kubecfg`, you can instead reference the downloaded `kubecfg.yaml` credentials as flags to `kubectl`:
+
+```
+$ KUBECONFIG=/path/to/kubecfg.yaml \
+	kubectl --context cluster1.kops.integration.dsd.io \
+		get pods
+```
+
 ## Cluster components
 
 Example cluster components/services in `cluster-components/` - intended as a starting point for experimentation and discussion, but also providing some useful functionality.
 
-Cluster components are installed using `Helm`/`Tiller`, so that must be installed first.
+For convenience, most cluster components are installed using `Helm`/`Tiller`, so that must be installed first. As Helm packages often require arguments to be provided at installation, a `values.yml` file has been provided for each component that is using Helm.
 
 ### Helm
 
