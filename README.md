@@ -155,3 +155,10 @@ The configuration in `values.yml` allows DNS to be created for `Service` objects
 `$ helm install kube-lego -f cluster-components/kube-lego/values.yml`
 
 For an Ingress rule to receive a TTLs certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
+
+### kuberos
+[kuberos](https://github.com/negz/kuberos/) is a simple app to handle cluster credential generation when using OIDC [Authentication](#authentication) - it's not great, but good enough for now.
+
+As no Helm chart is available for Kuberos YAML resource definitions have been created in `cluster-components/kuberos` instead. To create or update these resources, run:
+
+`$ kubectl apply -f cluster-components/kuberos/`
