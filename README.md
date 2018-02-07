@@ -14,7 +14,7 @@ This readme is split into the following sections:
 - [Cluster Components](#cluster-components)
 
 
-### GPG Note
+###GPG Note
 As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to access sensitive information such as SSH keys and authentication secrets.
 
 A GPG key is not required to obtain Kubernetes credentials and interact with clusters however - cluster admin credentials can be obtained by logging into [Kuberos](#authentication) with your Github account. Additionally, as long as you have valid AWS credentials and access to the Kops S3 bucket you can download static admin credentials for `kubeconfig` using `kops`.
@@ -53,13 +53,23 @@ brew install git-crypt
 Refer to [kops documentation](https://github.com/kubernetes/kops/blob/master/docs/changing_configuration.md)
 
 ### Creating a new cluster
+Set an environment variable for your cluster name (must be DNS compliant - no underscores or similar):
+
+`export CLUSTER_NAME=cluster1`
+
+#### Create a Route53 HostedZone
+
+Both `kops` and the [external-dns component](#external-dns) will create DNS records for the cluster, so a cluster-specific DNS zone should be created to avoid interfering with other clusters or services in AWS.
+
+1. Using either the console or AWS CLI create a Route53 hosted zone called `$CLUSTER_NAME.kops.integration.dsd.io.`
+2. Copy the value of the `NS` record for that zone (the 4 lines like `ns-1722.awsdns-23.co.uk.`)
+3. In the parent HostedZone, `kops.integration.dsd.io.`, create an `NS` record containing those 4 nameservers
 
 #### Create cluster specification
 Generate a new SSH key and use `kops` to generate a new cluster specification - example for `cluster1.yaml`:
 
 ```
 export KOPS_STATE_STORE=s3://moj-cloud-platforms-kops-state-store
-export CLUSTER_NAME=cluster1
 
 ssh-keygen -t rsa -f ssh/${CLUSTER_NAME}_kops_id_rsa -N '' -C ${CLUSTER_NAME}
 
@@ -146,8 +156,6 @@ For convenience, most cluster components are installed using `Helm`/`Tiller`, so
 - Install Tiller, with ServiceAccount config: `$ helm init --service-account tiller`
 
 This installs Tiller as a cluster-wide service, with `cluster-admin` permissions. These permissions are too broad for a production multi-tenant environment, and are used here for test purposes only - in real-world usage Tiller should be deployed into each tenant namespace, with permissions scoped to that namespaces only.
-
-For reference, the rendered output of each Helm package used in this repo is included in `cluster-components/$COMPONENT/rendered-resources` - these are the equivalent resource definitions that would be created without Helm.
 
 #### Using Helm
 - `$ helm repo update` - update package list, a la `apt-get update`
