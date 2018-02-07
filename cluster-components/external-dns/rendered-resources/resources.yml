@@ -1,0 +1,122 @@
+---
+# Source: external-dns/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:     
+    app: external-dns
+    heritage: Tiller
+    release: RELEASE-NAME
+    chart: external-dns-0.4.6
+  name: RELEASE-NAME-external-dns
+
+---
+# Source: external-dns/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:     
+    app: external-dns
+    heritage: Tiller
+    release: RELEASE-NAME
+    chart: external-dns-0.4.6
+  name: RELEASE-NAME-external-dns
+rules:
+  - apiGroups:
+      - ""
+      - extensions
+    resources:
+      - ingresses
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+---
+# Source: external-dns/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:     
+    app: external-dns
+    heritage: Tiller
+    release: RELEASE-NAME
+    chart: external-dns-0.4.6
+  name: RELEASE-NAME-external-dns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: RELEASE-NAME-external-dns
+subjects:
+  - kind: ServiceAccount
+    name: RELEASE-NAME-external-dns
+    namespace: default
+---
+# Source: external-dns/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: external-dns
+    chart: external-dns-0.4.6
+    heritage: Tiller
+    release: RELEASE-NAME
+  name: RELEASE-NAME-external-dns
+spec:
+  clusterIP: ""
+  ports:
+    - port: 7979
+      protocol: TCP
+      targetPort: 7979
+  selector:
+    app: external-dns
+    release: RELEASE-NAME
+  type: "ClusterIP"
+
+---
+# Source: external-dns/templates/deployment.yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:     
+    app: external-dns
+    heritage: Tiller
+    release: RELEASE-NAME
+    chart: external-dns-0.4.6
+  name: RELEASE-NAME-external-dns
+spec:
+  template:
+    metadata:
+      labels:         
+        app: external-dns
+        heritage: Tiller
+        release: RELEASE-NAME
+    spec:
+      containers:
+        - name: external-dns
+          image: "registry.opensource.zalan.do/teapot/external-dns:v0.4.8"
+          imagePullPolicy: "IfNotPresent"
+          args:
+            - --log-level=debug
+            - --domain-filter=cluster1.kops.integration.dsd.io
+            - --policy=upsert-only
+            - --provider=aws
+            - --source=service
+            - --aws-zone-type=public
+          volumeMounts:
+          env:
+          - name: AWS_DEFAULT_REGION
+            value: eu-west-1
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 7979
+          ports:
+            - containerPort: 7979
+      volumes:
+      serviceAccountName: RELEASE-NAME-external-dns
+
+---
+# Source: external-dns/templates/secret.yaml
+
+
