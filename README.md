@@ -1,12 +1,32 @@
 # cloud-platforms-k8s-kops
-Resources for Kubernetes clusters with Kops, and example cluster service resources (not Kops-specifc).
+This project is a Kubernetes testbed, intended to allow experimentation and evaluation with minimal setup required - essentially a prototype hosting platform, or Rails scaffold for Kubernetes.
 
-## Prerequisites
+Included here are resources to provision Kubernetes clusters with [Kops](https://github.com/kubernetes/kops), as a standin for AWS Elastic Kubernetes Service until that becomes available.
+
+Also included are sample cluster components for common services (authentication, HTTP routing, DNS, etc), and test applications for deployment; the expectation is that all cluster components will be able to be deployed to an EKS cluster as-is.
+
+### Sections
+
+This readme is split into the following sections:
+
+- [Cluster Operations](#cluster-operations)
+- [Authentication](#authentication)
+- [Cluster Components](#cluster-components)
+
+
+###GPG Note
+As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to access sensitive information such as SSH keys and authentication secrets.
+
+A GPG key is not required to obtain Kubernetes credentials and interact with clusters however - cluster admin credentials can be obtained by logging into [Kuberos](#authentication) with your Github account. Additionally, as long as you have valid AWS credentials and access to the Kops S3 bucket you can download static admin credentials for `kubeconfig` using `kops`.
+
+## Cluster operations
+Info on how to modify infrastructure and configuration of existing clusters, and how to provision new clusters.
+
+### Prerequisites
 - Install [Kops](https://github.com/kubernetes/kops)
 - Install [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/)
 - Install [git-crypt](https://www.agwa.name/projects/git-crypt/)
 
-**GPG Note:** As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to use the SSH keys. A GPG is not required to obtain Kubernetes credentials and interact with clusters however - as long as you have valid AWS credentials and access to the Kops S3 bucket you can download credentials for `kubeconfig` using `kops`.
 
 ### MacOS
 ```
