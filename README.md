@@ -27,17 +27,16 @@ Info on how to modify infrastructure and configuration of existing clusters, and
 - Install [kubectl](https://kubernetes.io/docs/reference/kubectl/overview/)
 - Install [git-crypt](https://www.agwa.name/projects/git-crypt/)
 
-
-### MacOS
+#### MacOS
 ```
 brew install kops
 brew install kubernetes-cli
 brew install git-crypt
 ```
 
-## Working with existing cluster (`cluster1`)
+### Working with existing cluster (`cluster1`)
 
-### Prerequisites
+#### Prerequisites
 1. Make sure you have credentials for the correct AWS account and that they are active:
  `$ export AWS_PROFILE=mojds-platforms-integration`
 2. Kops stores resource specifications and credentials in an S3 bucket, which must be specified before using `kops`:
@@ -49,13 +48,13 @@ brew install git-crypt
 5. Check what's running:
  `$ kubectl get pods --all-namespaces`
 
-## Editing cluster config / changing config
+### Editing cluster config / changing config
 
 Refer to [kops documentation](https://github.com/kubernetes/kops/blob/master/docs/changing_configuration.md)
 
-## Creating a new cluster
+### Creating a new cluster
 
-### Create cluster specification
+#### Create cluster specification
 Generate a new SSH key and use `kops` to generate a new cluster specification - example for `cluster1.yaml`:
 
 ```
