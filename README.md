@@ -147,6 +147,8 @@ For convenience, most cluster components are installed using `Helm`/`Tiller`, so
 
 This installs Tiller as a cluster-wide service, with `cluster-admin` permissions. These permissions are too broad for a production multi-tenant environment, and are used here for test purposes only - in real-world usage Tiller should be deployed into each tenant namespace, with permissions scoped to that namespaces only.
 
+For reference, the rendered output of each Helm package used in this repo is included in `cluster-components/$COMPONENT/rendered-resources` - these are the equivalent resource definitions that would be created without Helm.
+
 #### Using Helm
 - `$ helm repo update` - update package list, a la `apt-get update`
 - `$ helm search` - see what's available in the public repo
