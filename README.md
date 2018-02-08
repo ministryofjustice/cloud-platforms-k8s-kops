@@ -14,7 +14,7 @@ This readme is split into the following sections:
 - [Cluster Components](#cluster-components)
 
 
-###GPG Note
+### GPG Note
 As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to access sensitive information such as SSH keys and authentication secrets.
 
 A GPG key is not required to obtain Kubernetes credentials and interact with clusters however - cluster admin credentials can be obtained by logging into [Kuberos](#authentication) with your Github account. Additionally, as long as you have valid AWS credentials and access to the Kops S3 bucket you can download static admin credentials for `kubeconfig` using `kops`.
