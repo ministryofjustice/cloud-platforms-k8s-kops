@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kuberos
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: kuberos.apps.cluster1.kops.integration.dsd.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kuberos
+          servicePort: http
+  tls:
+  - secretName: kuberos-tls
+    hosts:
+    - "kuberos.apps.cluster1.kops.integration.dsd.io"

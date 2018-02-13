@@ -1,0 +1,10 @@
+controller:
+  replicaCount: 3
+
+  service:
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: "*.apps.cluster1.kops.integration.dsd.io"
+
+rbac:
+  create: true
+  serviceAccountName: default
