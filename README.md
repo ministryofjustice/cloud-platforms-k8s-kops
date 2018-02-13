@@ -92,7 +92,7 @@ kops create cluster \
 ```
 
 ##### High availability, network topology and NAT gateways
-The above command will create a highly-available cluster across all three AZs in eu-west-1, using a private network topology - 3 public subnets containing 3 NAT gateways and a single SSH bastion host, and 3 private subnets containing all masters and worker nodes. To run a smaller, non-HA cluster for testing, specify one AZ only for the `--zones` and `--master-zones` flag (ie. `--zones=eu-west-1a`, and optionally specify `--topology=public` to deploy all instances to public subnets without NAT gateways.
+The above command will create a highly-available cluster across all three AZs in eu-west-1, using a private network topology - 3 public subnets containing 3 NAT gateways and a single SSH bastion host, and 3 private subnets containing all masters and worker nodes. To run a smaller, non-HA cluster for testing, specify one AZ only for the `--zones` and `--master-zones` flag (ie. `--zones=eu-west-1a`. To reduce the number of EC2 instances provisioned, you can also specify `--topology=public` to deploy all instances to public subnets without NAT gateways, and remove the `--bastion` flag to skip provisioning of the SSH bastion host.
 
 #### Create cluster specification in kops state store
 `$ kops create -f ${CLUSTER_NAME}.yaml`
