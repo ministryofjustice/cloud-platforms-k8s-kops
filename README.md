@@ -1,4 +1,4 @@
-f# cloud-platforms-k8s-kops
+# cloud-platforms-k8s-kops
 This project is a Kubernetes testbed, intended to allow experimentation and evaluation with minimal setup required - essentially a prototype hosting platform, or Rails scaffold for Kubernetes.
 
 Included here are resources to provision Kubernetes clusters with [Kops](https://github.com/kubernetes/kops), as a standin for AWS Elastic Kubernetes Service until that becomes available.
