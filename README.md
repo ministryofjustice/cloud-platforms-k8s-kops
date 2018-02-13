@@ -50,7 +50,37 @@ brew install git-crypt
 
 ### Editing cluster config / changing config
 
-Refer to [kops documentation](https://github.com/kubernetes/kops/blob/master/docs/changing_configuration.md)
+Edit the `cluster.yml` with your desired changes (e.g. [adding an additional IAM policy for external-dns](#iam-policies-for-external-dns)), then run
+
+```
+$ kops replace -f $YOUR_CLUSTER.yml
+```
+
+this will replace the existing cluster specification YML in S3 with your new version. Then:
+
+```
+$ kops update cluster
+```
+
+to preview the changes kops will apply to AWS. Then:
+
+```
+$ kops update cluster --yes
+```
+
+to actually apply the changes. If these changes require that EC2 instances be replaced this will be noted in the output; a [rolling update](https://github.com/kubernetes/kops/blob/master/docs/cli/kops_rolling-update.md) can then be performed with:
+
+```
+$ kops rolling-update cluster
+```
+
+to preview changes, and:
+
+```
+$ kops rolling-update cluster --yes
+```
+
+to perform the rolling update.
 
 ### Creating a new cluster
 Set an environment variable for your cluster name (must be DNS compliant - no underscores or similar):
@@ -91,6 +121,38 @@ kops create cluster \
     > ${CLUSTER_NAME}.yaml
 ```
 
+##### IAM policies for external-dns
+
+For [external-dns](#external-dns) to be able to manage records in Route53, the EC2 instances in the cluster must have an IAM policy allowing Route53 changes. Because this functionality is not part of core Kubernetes, an additional policy must be added to the instances. Kops allows you to add additional policies in the cluster specification and have an IAM policy created and attached to the role. To do so, add this block to the `spec` section of your `cluster.yml` file (see `cluster1.yml` for a working example):
+
+```
+  additionalPolicies:
+    node: |
+      [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "route53:ChangeResourceRecordSets"
+          ],
+          "Resource": [
+            "arn:aws:route53:::hostedzone/$YOUR_ZONE_ID"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "route53:ListHostedZones",
+            "route53:ListResourceRecordSets"
+          ],
+          "Resource": [
+            "*"
+          ]
+        }
+      ]
+```
+
+Where `$YOUR_ZONE_ID` is the ID of your Route53 zone for your cluster.
+
 ##### High availability, network topology and NAT gateways
 The above command will create a highly-available cluster across all three AZs in eu-west-1, using a private network topology - 3 public subnets containing 3 NAT gateways and a single SSH bastion host, and 3 private subnets containing all masters and worker nodes. To run a smaller, non-HA cluster for testing, specify one AZ only for the `--zones` and `--master-zones` flag (ie. `--zones=eu-west-1a`. To reduce the number of EC2 instances provisioned, you can also specify `--topology=public` to deploy all instances to public subnets without NAT gateways, and remove the `--bastion` flag to skip provisioning of the SSH bastion host.
 
@@ -109,6 +171,9 @@ It takes a few minutes for the cluster to deploy and come up - you can check pro
 `$ kops validate cluster`
 
 Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` you can proceed to use `kubectl` to interact with the cluster.
+
+#### Changing cluster configuration after creation
+Refer to [Editing cluster config / changing config](#editing-cluster-config-changing-config)
 
 ## Authentication
 
@@ -149,6 +214,10 @@ $ KUBECONFIG=/path/to/kubecfg.yaml \
 Example cluster components/services in `cluster-components/` - intended as a starting point for experimentation and discussion, but also providing some useful functionality.
 
 For convenience, most cluster components are installed using `Helm`/`Tiller`, so that must be installed first. As Helm packages often require arguments to be provided at installation, a `values.yml` file has been provided for each component that is using Helm.
+
+### New cluster config
+
+The example cluster components and applications config contain references to cluster-specific domain names, so when creating a new cluster you should copy the contents of `cluster-components/cluster1` to `cluster-components/$YOUR_CLUSTER` and replace references to `cluster1.kops.integration.dsd.io` with `$YOUR_CLUSTER.kops.integration.dsd.io` in all YAML files before creating any of the components below. For helm-managed components (nginx-ingress, external-dns and kube-lego) these references are in their respective `values.yml` files; for `kuberos` and `example-apps/nginx`, these references are in `ingress.yml` in both cases.
 
 ### Helm
 
