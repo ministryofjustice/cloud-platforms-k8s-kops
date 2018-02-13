@@ -91,6 +91,9 @@ kops create cluster \
     > ${CLUSTER_NAME}.yaml
 ```
 
+##### High availability, network topology and NAT gateways
+The above command will create a highly-available cluster across all three AZs in eu-west-1, using a private network topology - 3 public subnets containing 3 NAT gateways and a single SSH bastion host, and 3 private subnets containing all masters and worker nodes. To run a smaller, non-HA cluster for testing, specify one AZ only for the `--zones` and `--master-zones` flag (ie. `--zones=eu-west-1a`, and optionally specify `--topology=public` to deploy all instances to public subnets without NAT gateways.
+
 #### Create cluster specification in kops state store
 `$ kops create -f ${CLUSTER_NAME}.yaml`
 
