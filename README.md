@@ -1,4 +1,4 @@
-# cloud-platforms-k8s-kops
+f# cloud-platforms-k8s-kops
 This project is a Kubernetes testbed, intended to allow experimentation and evaluation with minimal setup required - essentially a prototype hosting platform, or Rails scaffold for Kubernetes.
 
 Included here are resources to provision Kubernetes clusters with [Kops](https://github.com/kubernetes/kops), as a standin for AWS Elastic Kubernetes Service until that becomes available.
@@ -238,7 +238,7 @@ This installs Tiller as a cluster-wide service, with `cluster-admin` permissions
 
 An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers) based on nginx. Ingress controllers serve as HTTP routers/proxies that watch the Kubernetes API for `Ingress` rules, and create routes/proxy configs to route traffic from the internet to services and pods.
 
-`$ helm install nginx-ingress -f cluster-components/nginx-ingress/values.yml`
+`$ helm install nginx-ingress -f cluster-components/$YOUR_CLUSTER/nginx-ingress/values.yml`
 
 This will deploy the nginx-ingress controller using the arguments specified in `values.yml`. By default, nginx-ingress specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
 
@@ -246,14 +246,14 @@ This will deploy the nginx-ingress controller using the arguments specified in `
 
 [external-dns](https://github.com/kubernetes-incubator/external-dns) is a Kubernetes incubator project that automatically creates/updates/deletes DNS entries in Route53 based on declared hostnames in `Ingress` and `Service` objects. To install with Helm:
 
-`$ helm install external-dns -f cluster-components/external-dns/values.yml`
+`$ helm install external-dns -f cluster-components/$YOUR_CLUSTER/external-dns/values.yml`
 
 The configuration in `values.yml` allows DNS to be created for `Service` objects only, as these examples are using a single `nginx-ingress` service and ELB; that nginx-ingress `Service` object has a `external-dns.alpha.kubernetes.io/hostname` annotation to create a wildcard DNS record for that ELB.
 
 ### kube-lego
 [kube-lego](https://github.com/jetstack/kube-lego) is an in-cluster service that watches the Kubernetes API for `Ingress` rules with SSL/TLS definitions, obtains TLS certificates from Let's Encrypt, and configures the ingress-controller with the obtained cert. To install with Helm:
 
-`$ helm install kube-lego -f cluster-components/kube-lego/values.yml`
+`$ helm install kube-lego -f cluster-components/$YOUR_CLUSTER/kube-lego/values.yml`
 
 For an Ingress rule to receive a TLS certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
 
@@ -262,4 +262,4 @@ For an Ingress rule to receive a TLS certificate and for the ingress controller 
 
 As no Helm chart is available for Kuberos YAML resource definitions have been created in `cluster-components/kuberos` instead. To create or update these resources, run:
 
-`$ kubectl apply -f cluster-components/kuberos/`
+`$ kubectl apply -f cluster-components/$YOUR_CLUSTER/kuberos/`
