@@ -14,7 +14,7 @@ This readme is split into the following sections:
 - [Cluster Components](#cluster-components)
 
 
-###GPG Note
+### GPG Note
 As this repo uses `git-crypt` your GPG key must be added to this repo for you to be able to access sensitive information such as SSH keys and authentication secrets.
 
 A GPG key is not required to obtain Kubernetes credentials and interact with clusters however - cluster admin credentials can be obtained by logging into [Kuberos](#authentication) with your Github account. Additionally, as long as you have valid AWS credentials and access to the Kops S3 bucket you can download static admin credentials for `kubeconfig` using `kops`.
@@ -55,7 +55,7 @@ Refer to [kops documentation](https://github.com/kubernetes/kops/blob/master/doc
 ### Creating a new cluster
 Set an environment variable for your cluster name (must be DNS compliant - no underscores or similar):
 
-`export CLUSTER_NAME=cluster1`
+`export CLUSTER_NAME=cluster2`
 
 #### Create a Route53 HostedZone
 
@@ -81,7 +81,7 @@ kops create cluster \
     --master-zones=eu-west-1a,eu-west-1b,eu-west-1c \
     --master-size=t2.medium \
     --topology=private \
-    --dns-zone=kops.integration.dsd.io \
+    --dns-zone=${CLUSTER_NAME}.kops.integration.dsd.io \
     --ssh-public-key=ssh/${CLUSTER_NAME}_kops_id_rsa.pub \
     --authorization=RBAC \
     --networking=calico \
@@ -186,7 +186,7 @@ The configuration in `values.yml` allows DNS to be created for `Service` objects
 
 `$ helm install kube-lego -f cluster-components/kube-lego/values.yml`
 
-For an Ingress rule to receive a TTLs certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
+For an Ingress rule to receive a TLS certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
 
 ### kuberos
 [kuberos](https://github.com/negz/kuberos/) is a simple app to handle cluster credential generation when using OIDC [Authentication](#authentication) - it's not great, but good enough for now.
