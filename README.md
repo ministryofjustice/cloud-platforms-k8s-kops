@@ -50,7 +50,37 @@ brew install git-crypt
 
 ### Editing cluster config / changing config
 
-Refer to [kops documentation](https://github.com/kubernetes/kops/blob/master/docs/changing_configuration.md)
+Edit the `cluster.yml` with your desired changes (e.g. [adding an additional IAM policy for external-dns](#iam-policies-for-external-dns)), then run
+
+```
+$ kops replace -f $YOUR_CLUSTER.yml
+```
+
+this will replace the existing cluster specification YML in S3 with your new version. Then:
+
+```
+$ kops update cluster
+```
+
+to preview the changes kops will apply to AWS. Then:
+
+```
+$ kops update cluster --yes
+```
+
+to actually apply the changes. If these changes require that EC2 instances be replaced this will be noted in the output; a [rolling update](https://github.com/kubernetes/kops/blob/master/docs/cli/kops_rolling-update.md) can then be performed with:
+
+```
+$ kops rolling-update cluster
+```
+
+to preview changes, and:
+
+```
+$ kops rolling-update cluster --yes
+```
+
+to perform the rolling update.
 
 ### Creating a new cluster
 Set an environment variable for your cluster name (must be DNS compliant - no underscores or similar):
@@ -91,6 +121,38 @@ kops create cluster \
     > ${CLUSTER_NAME}.yaml
 ```
 
+##### IAM policies for external-dns
+
+For [external-dns](#external-dns) to be able to manage records in Route53, the EC2 instances in the cluster must have an IAM policy allowing Route53 changes. Because this functionality is not part of core Kubernetes, an additional policy must be added to the instances. Kops allows you to add additional policies in the cluster specification and have an IAM policy created and attached to the role. To do so, add this block to the `spec` section of your `cluster.yml` file (see `cluster1.yml` for a working example):
+
+```
+  additionalPolicies:
+    node: |
+      [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "route53:ChangeResourceRecordSets"
+          ],
+          "Resource": [
+            "arn:aws:route53:::hostedzone/$YOUR_ZONE_ID"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "route53:ListHostedZones",
+            "route53:ListResourceRecordSets"
+          ],
+          "Resource": [
+            "*"
+          ]
+        }
+      ]
+```
+
+Where `$YOUR_ZONE_ID` is the ID of your Route53 zone for your cluster.
+
 ##### High availability, network topology and NAT gateways
 The above command will create a highly-available cluster across all three AZs in eu-west-1, using a private network topology - 3 public subnets containing 3 NAT gateways and a single SSH bastion host, and 3 private subnets containing all masters and worker nodes. To run a smaller, non-HA cluster for testing, specify one AZ only for the `--zones` and `--master-zones` flag (ie. `--zones=eu-west-1a`. To reduce the number of EC2 instances provisioned, you can also specify `--topology=public` to deploy all instances to public subnets without NAT gateways, and remove the `--bastion` flag to skip provisioning of the SSH bastion host.
 
@@ -109,6 +171,9 @@ It takes a few minutes for the cluster to deploy and come up - you can check pro
 `$ kops validate cluster`
 
 Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` you can proceed to use `kubectl` to interact with the cluster.
+
+#### Changing cluster configuration after creation
+Refer to [Editing cluster config / changing config](#editing-cluster-config-changing-config)
 
 ## Authentication
 
@@ -134,7 +199,7 @@ This is included in the full `cluster1.yaml` specification.
 ### End user authentication and credential setup
 End users require credentials on their local machines in order to be able to use `kubectl`, `helm` etc. Those credentials contain information obtained from the identity provider - in our case Auth0 - which requires a browser-based authentication flow.
 
-To handle user authentication and generation of cluster credentials, a webapp called [Kuberos](#kuberos) has been deployed at [https://kuberos.apps.cluster1.kops.integration.dsd.io](https://kuberos.apps.cluster1.kops.integration.dsd.io).
+To handle user authentication and generation of cluster credentials, a webapp called [Kuberos](#kuberos) has been deployed at [https://kuberos.apps.cluster1.kops.integration.dsd.io](https://kuberos.apps.cluster1.kops.integration.dsd.io). Kuberos is a per-cluster service, so must be deployed into any other test clusters that are created - see [Kuberos](#kuberos).
 
 **Important note** - the instructions provided by Kuberos will either overwrite your local `kubectl` config entirely, or any existing config for this specific cluster, so if you have already obtained static cluster credentials with `kops export kubecfg`, you can instead reference the downloaded `kubecfg.yaml` credentials as flags to `kubectl`:
 
@@ -150,6 +215,10 @@ Example cluster components/services in `cluster-components/` - intended as a sta
 
 For convenience, most cluster components are installed using `Helm`/`Tiller`, so that must be installed first. As Helm packages often require arguments to be provided at installation, a `values.yml` file has been provided for each component that is using Helm.
 
+### New cluster config
+
+The example cluster components and applications config contain references to cluster-specific domain names, so when creating a new cluster you should copy the contents of `cluster-components/cluster1` to `cluster-components/$YOUR_CLUSTER` and replace references to `cluster1.kops.integration.dsd.io` with `$YOUR_CLUSTER.kops.integration.dsd.io` in all YAML files before creating any of the components below. For helm-managed components (nginx-ingress, external-dns and kube-lego) these references are in their respective `values.yml` files; for `kuberos` and `example-apps/nginx`, these references are in `ingress.yml` in both cases.
+
 ### Helm
 
 [Helm](https://helm.sh) - the package manager for Kubernetes. Includes two components - `Helm`, the command line client, and `Tiller`, the server-side component.
@@ -163,13 +232,19 @@ This installs Tiller as a cluster-wide service, with `cluster-admin` permissions
 #### Using Helm
 - `$ helm repo update` - update package list, a la `apt-get update`
 - `$ helm search` - see what's available in the public repo
+- `$ helm inspect values wordpress` - see what arguments are available for this package
 - `$ helm install wordpress` - install Wordpress
+
+To specify arguments when installing, either:
+
+- use the helm `--set` flag: `helm install wordpress --set wordpressUsername=joebloggs --set mariadb.enabled=false`
+- or save the output of `helm inspect values` to a yaml file, change values as required, and pass the filepath to helm: `helm install wordpress --values values.yml`
 
 ### nginx-ingress
 
 An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-controllers) based on nginx. Ingress controllers serve as HTTP routers/proxies that watch the Kubernetes API for `Ingress` rules, and create routes/proxy configs to route traffic from the internet to services and pods.
 
-`$ helm install nginx-ingress -f cluster-components/nginx-ingress/values.yml`
+`$ helm install nginx-ingress -f cluster-components/$YOUR_CLUSTER/nginx-ingress/values.yml`
 
 This will deploy the nginx-ingress controller using the arguments specified in `values.yml`. By default, nginx-ingress specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
 
@@ -177,14 +252,14 @@ This will deploy the nginx-ingress controller using the arguments specified in `
 
 [external-dns](https://github.com/kubernetes-incubator/external-dns) is a Kubernetes incubator project that automatically creates/updates/deletes DNS entries in Route53 based on declared hostnames in `Ingress` and `Service` objects. To install with Helm:
 
-`$ helm install external-dns -f cluster-components/external-dns/values.yml`
+`$ helm install external-dns -f cluster-components/$YOUR_CLUSTER/external-dns/values.yml`
 
 The configuration in `values.yml` allows DNS to be created for `Service` objects only, as these examples are using a single `nginx-ingress` service and ELB; that nginx-ingress `Service` object has a `external-dns.alpha.kubernetes.io/hostname` annotation to create a wildcard DNS record for that ELB.
 
 ### kube-lego
 [kube-lego](https://github.com/jetstack/kube-lego) is an in-cluster service that watches the Kubernetes API for `Ingress` rules with SSL/TLS definitions, obtains TLS certificates from Let's Encrypt, and configures the ingress-controller with the obtained cert. To install with Helm:
 
-`$ helm install kube-lego -f cluster-components/kube-lego/values.yml`
+`$ helm install kube-lego -f cluster-components/$YOUR_CLUSTER/kube-lego/values.yml`
 
 For an Ingress rule to receive a TLS certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
 
@@ -193,4 +268,4 @@ For an Ingress rule to receive a TLS certificate and for the ingress controller 
 
 As no Helm chart is available for Kuberos YAML resource definitions have been created in `cluster-components/kuberos` instead. To create or update these resources, run:
 
-`$ kubectl apply -f cluster-components/kuberos/`
+`$ kubectl apply -f cluster-components/$YOUR_CLUSTER/kuberos/`
