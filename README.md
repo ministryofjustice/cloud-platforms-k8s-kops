@@ -232,7 +232,13 @@ This installs Tiller as a cluster-wide service, with `cluster-admin` permissions
 #### Using Helm
 - `$ helm repo update` - update package list, a la `apt-get update`
 - `$ helm search` - see what's available in the public repo
+- `$ helm inspect values wordpress` - see what arguments are available for this package
 - `$ helm install wordpress` - install Wordpress
+
+To specify arguments when installing, either:
+
+- use the helm `--set` flag: `helm install wordpress --set wordpressUsername=joebloggs --set mariadb.enabled=false`
+- or save the output of `helm inspect values` to a yaml file, change values as required, and pass the filepath to helm: `helm install wordpress --values values.yml`
 
 ### nginx-ingress
 
