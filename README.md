@@ -199,7 +199,7 @@ This is included in the full `cluster1.yaml` specification.
 ### End user authentication and credential setup
 End users require credentials on their local machines in order to be able to use `kubectl`, `helm` etc. Those credentials contain information obtained from the identity provider - in our case Auth0 - which requires a browser-based authentication flow.
 
-To handle user authentication and generation of cluster credentials, a webapp called [Kuberos](#kuberos) has been deployed at [https://kuberos.apps.cluster1.kops.integration.dsd.io](https://kuberos.apps.cluster1.kops.integration.dsd.io).
+To handle user authentication and generation of cluster credentials, a webapp called [Kuberos](#kuberos) has been deployed at [https://kuberos.apps.cluster1.kops.integration.dsd.io](https://kuberos.apps.cluster1.kops.integration.dsd.io). Kuberos is a per-cluster service, so must be deployed into any other test clusters that are created - see [Kuberos](#kuberos).
 
 **Important note** - the instructions provided by Kuberos will either overwrite your local `kubectl` config entirely, or any existing config for this specific cluster, so if you have already obtained static cluster credentials with `kops export kubecfg`, you can instead reference the downloaded `kubecfg.yaml` credentials as flags to `kubectl`:
 
