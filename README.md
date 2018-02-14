@@ -224,7 +224,7 @@ The example cluster components and applications config contain references to clu
 [Helm](https://helm.sh) - the package manager for Kubernetes. Includes two components - `Helm`, the command line client, and `Tiller`, the server-side component.
 
 - Install command line client: `$ brew install kubernetes-helm`
-- Create a ServiceAccount and RoleBinding for Tiller: `$ kubectl apply -f cluster-components/helm/rbac-config.yml`
+- Create a ServiceAccount and RoleBinding for Tiller: `$ kubectl apply -f cluster-components/$YOUR_CLUSTER/helm/rbac-config.yml`
 - Install Tiller, with ServiceAccount config: `$ helm init --service-account tiller`
 
 This installs Tiller as a cluster-wide service, with `cluster-admin` permissions. These permissions are too broad for a production multi-tenant environment, and are used here for test purposes only - in real-world usage Tiller should be deployed into each tenant namespace, with permissions scoped to that namespaces only.
@@ -266,6 +266,6 @@ For an Ingress rule to receive a TLS certificate and for the ingress controller 
 ### kuberos
 [kuberos](https://github.com/negz/kuberos/) is a simple app to handle cluster credential generation when using OIDC [Authentication](#authentication) - it's not great, but good enough for now.
 
-As no Helm chart is available for Kuberos YAML resource definitions have been created in `cluster-components/kuberos` instead. To create or update these resources, run:
+As no Helm chart is available for Kuberos YAML resource definitions have been created in `cluster-components/$YOUR_CLUSTER/kuberos` instead. To create or update these resources, run:
 
 `$ kubectl apply -f cluster-components/$YOUR_CLUSTER/kuberos/`
