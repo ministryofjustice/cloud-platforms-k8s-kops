@@ -4,8 +4,6 @@ metadata:
   name: kuberos
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    # kubernetes.io/tls-acme: "true"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: login.apps.cluster1.kops.integration.dsd.io
@@ -15,7 +13,3 @@ spec:
         backend:
           serviceName: kuberos
           servicePort: http
-  # tls:
-  # - secretName: kuberos-tls
-  #   hosts:
-  #   - "kuberos.apps.cluster1.kops.integration.dsd.io"
