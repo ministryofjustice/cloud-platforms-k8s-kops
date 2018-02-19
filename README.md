@@ -176,7 +176,7 @@ Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` 
 Refer to [Editing cluster config / changing config](#editing-cluster-config-changing-config)
 
 ## SSL Termination
-You must create an AWS ACM certificate separately, with a wildcard domain for apps to use. Refer to [SSL Termination](#ssl-termination) for details.
+You must create an AWS ACM certificate separately, with a wildcard domain for apps to use. Refer to [SSL Termination](#ssl-termination-1) for details.
 
 ## Authentication
 
