@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute
+  namespace: guestbook-production
+spec:
+  hard:
+    limits.cpu: "2"
+    limits.memory: 2Gi
+
+---
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: compute
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "1"
+      memory: 512Mi
+    defaultRequest:
+      cpu: 200m
+      memory: 128Mi
+
