@@ -175,6 +175,9 @@ Once it reports `Your cluster ${CLUSTER_NAME}.kops.integration.dsd.io is ready` 
 #### Changing cluster configuration after creation
 Refer to [Editing cluster config / changing config](#editing-cluster-config-changing-config)
 
+## SSL Termination
+You must create an AWS ACM certificate separately, with a wildcard domain for apps to use. Refer to [SSL Termination](#ssl-termination) for details.
+
 ## Authentication
 
 ### Identity provider and Kubernetes cluster config
@@ -217,7 +220,7 @@ For convenience, most cluster components are installed using `Helm`/`Tiller`, so
 
 ### New cluster config
 
-The example cluster components and applications config contain references to cluster-specific domain names, so when creating a new cluster you should copy the contents of `cluster-components/cluster1` to `cluster-components/$YOUR_CLUSTER` and replace references to `cluster1.kops.integration.dsd.io` with `$YOUR_CLUSTER.kops.integration.dsd.io` in all YAML files before creating any of the components below. For helm-managed components (nginx-ingress, external-dns and kube-lego) these references are in their respective `values.yml` files; for `kuberos` and `example-apps/nginx`, these references are in `ingress.yml` in both cases.
+The example cluster components and applications config contain references to cluster-specific domain names, so when creating a new cluster you should copy the contents of `cluster-components/cluster1` to `cluster-components/$YOUR_CLUSTER` and replace references to `cluster1.kops.integration.dsd.io` with `$YOUR_CLUSTER.kops.integration.dsd.io` in all YAML files before creating any of the components below. For helm-managed components (nginx-ingress and external-dns) these references are in their respective `values.yml` files; for `kuberos` and `example-apps/nginx`, these references are in `ingress.yml` in both cases.
 
 ### Helm
 
@@ -248,6 +251,9 @@ An [ingress controller](https://kubernetes.io/docs/concepts/services-networking/
 
 This will deploy the nginx-ingress controller using the arguments specified in `values.yml`. By default, nginx-ingress specifies a `Service` with `type=LoadBalancer`, so in AWS it will automatically create, configure and manage an ELB.
 
+#### SSL termination
+The configuration in `cluster-components/cluster1/nginx-ingress/values.yml` includes annotations to attach a pre-existing AWS ACM certificate to nginx-ingress's ELB, and configure SSL termination and HTTP->HTTPS redirect. To use this configuration, you must create an ACM certificate with a wildcard domain matching the one specified for `external-dns` / Route53, e.g. `*.apps.cluster1.kops.integration.dsd.io`
+
 ### external-dns
 
 [external-dns](https://github.com/kubernetes-incubator/external-dns) is a Kubernetes incubator project that automatically creates/updates/deletes DNS entries in Route53 based on declared hostnames in `Ingress` and `Service` objects. To install with Helm:
@@ -255,13 +261,6 @@ This will deploy the nginx-ingress controller using the arguments specified in `
 `$ helm install external-dns -f cluster-components/$YOUR_CLUSTER/external-dns/values.yml`
 
 The configuration in `values.yml` allows DNS to be created for `Service` objects only, as these examples are using a single `nginx-ingress` service and ELB; that nginx-ingress `Service` object has a `external-dns.alpha.kubernetes.io/hostname` annotation to create a wildcard DNS record for that ELB.
-
-### kube-lego
-[kube-lego](https://github.com/jetstack/kube-lego) is an in-cluster service that watches the Kubernetes API for `Ingress` rules with SSL/TLS definitions, obtains TLS certificates from Let's Encrypt, and configures the ingress-controller with the obtained cert. To install with Helm:
-
-`$ helm install kube-lego -f cluster-components/$YOUR_CLUSTER/kube-lego/values.yml`
-
-For an Ingress rule to receive a TLS certificate and for the ingress controller to make use of it, the Ingress rule must contain a `kubernetes.io/tls-acme: "true"` annotation, and a `tls` block defining the `Secret` where the certificate is stored. See `example-apps/nginx/ingress.yml` for a working example.
 
 ### kuberos
 [kuberos](https://github.com/negz/kuberos/) is a simple app to handle cluster credential generation when using OIDC [Authentication](#authentication) - it's not great, but good enough for now.
