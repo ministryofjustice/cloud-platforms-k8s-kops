@@ -1,3 +1,5 @@
+# *** DEPRECATED, please see https://github.com/ministryofjustice/cloud-platform-infrastructure
+
 # cloud-platforms-k8s-kops
 This project is a Kubernetes testbed, intended to allow experimentation and evaluation with minimal setup required - essentially a prototype hosting platform, or Rails scaffold for Kubernetes.
 
